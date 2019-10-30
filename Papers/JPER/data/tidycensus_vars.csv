@@ -1,0 +1,27 @@
+variable,label,norm
+B01001_001,Pop_totpop,-99
+B03002_003,Pop_nonhisp_white,B01001_001
+B03002_004,Pop_nonhisp_afam,B01001_001
+B03002_006,Pop_nonhisp_asn,B01001_001
+B03002_012,Pop_hisp,B01001_001
+B25003_001,Total_hh,-99
+B25003_003,Renter_occupied,B25003_001
+B01002_001,Med_age,-999
+B25035_001,Med_yr_struct  ,-999
+B25037_002,Med_yr_struct_own,-999
+B25037_003,Med_yr_struct_rent,-999
+C24070_001,Ind_totpop,-99
+C24070_002,Ind_ag_forestry,C24070_001
+C24070_003,Ind_construct,C24070_001
+C24070_004,Ind_manuf,C24070_001
+C24070_005,Ind_trade,C24070_001
+C24070_006,Ind_trans_utilities,C24070_001
+C24070_008,Ind_information,C24070_001
+C24070_009,Ind_finance_insure,C24070_001
+C24070_010,Ind_prof_sci,C24070_001
+C24070_011,Ind_ed_health,C24070_001
+C24070_012,Ind_arts,C24070_001
+C24070_014,Ind_public,C24070_001
+B06011_001,Median income,-999
+B08122_001,Tot_pop_pov,-99
+B08122_002,Pov_pop,B08122_001
