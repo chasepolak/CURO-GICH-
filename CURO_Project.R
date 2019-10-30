@@ -1,87 +1,247 @@
 library(tidyverse)
 library(readxl)
+
+#Load variable lists
+s2_varlist<-read_excel("data/s1_2_crosswalk.xlsx",sheet="s2_vars")
+s1_varlist<-read_excel("data/s1_2_crosswalk.xlsx",sheet="s1_vars")
+
 ###Read in Data
-commerce_issues <- read.csv("commerce issues.csv")
-commerce_owner <- read.csv("commerce owner.csv")
-commerce_proprty <- read.csv("commerce proprty.csv")
-Gainesville_issues_and_info <- read.csv("Gainesville issues and info.csv")
-hartwell_issues_and_owner_correct_version <- read.csv("hartwell issues and owner correct version.csv")
-millen_info_with_parcel_number <- read.csv("millen info with parcel number.csv")
-millen_issues <- read.csv("millen issues.csv")
-millen_owner <- read.csv("millen_owner.csv")
-monroe_info_full <- read.csv("monroe info.csv")
-monroe_issues <- read.csv("monroe issues.csv")
-warrenton_information_full <- read.csv("warrenton information.csv")
-warrenton_issues <- read.csv("warrenton issues.csv")
-Cochran_Issues <- read.csv("Cochran Issues.csv")
-Cochran_info_full <- read.csv("Cochran info.csv")
+record_times<-read_csv("data/record_times_all.csv") %>%
+  group_by(parcel_num,primary_city) %>%
+  summarise(record_id=first(record_id),
+            date=first(date))
+commerce_issues <- read_csv("data/Commerce/Commerce_shiny/Data/parcel_points.csv")
+commerce_owner <- read_excel("data/commerce owner.xlsx")
+commerce_proprty <- read_excel("data/commerce proprty.xlsx")
+Gainesville_issues_and_info <- read_excel("data/Gainesville issues and info.xlsx")
+hartwell_issues_and_owner_correct_version <- read_excel("data/hartwell issues and owner correct version.xlsx")
+millen_info_with_parcel_number <- read_excel("data/millen info with parcel number.xlsx")
+millen_issues <- read_csv("data/Millen/Millen_flexdash_v7/millen_surveydata_rev_2017_06_27.csv")
+millen_owner <- read_excel("data/millen_owner.xlsx")
+monroe_info <- read_excel("data/monroe info.xlsx")
+monroe_issues <- read_csv("data/Monroe/monroe_flexdash/Monroedata_2017_08_25_combined.csv") %>%
+  rename(Parcel_No=Parcel_ID)
+
+warrenton_information <- read_csv("data/warrenton_information1.csv")
+warrenton_issues1 <- read_csv("data/Warrenton/warrenton_shiny/Data/parcel_points_issue.csv") %>%
+  mutate(dummy=1) 
+warrenton_issues2<-warrenton_issues1 %>%
+  select(fulcrum_id:photo4) %>%
+  distinct
+warrenton_issues<-warrenton_issues1 %>%
+  select(fulcrum_id,value,dummy) %>%
+  distinct() %>%
+  spread(value,dummy,fill=0) %>%
+  right_join(warrenton_issues2)
+
+cochran_issues1 <- read_csv("data/Cochran/cochran_shiny/data/parcel_points_issue.csv") %>%
+  mutate(dummy=1) 
+cochran_issues2<-cochran_issues1 %>%
+  select(fulcrum_id:photo4) %>%
+  distinct
+cochran_issues<-cochran_issues1 %>%
+  select(fulcrum_id,value,dummy) %>%
+  distinct() %>%
+  spread(value,dummy,fill=0) %>%
+  right_join(cochran_issues2)
+Cochran_info1 <- read_excel("data/Cochran info.xlsx")
+Cochran_info<-read_csv("data/Cochran/cochran_shiny/data/cochran_parcelpoints_2018_07_13.csv") %>%
+  select(Ownkey,Parcel_No) %>%
+  distinct() %>%
+  rename(ownkey=Ownkey) %>%
+  right_join(Cochran_info1)
 ### Combine Commerce Data
-commerce_owner_property_full<-commerce_owner%>%
+commerce_owner_property<-commerce_owner%>%
   left_join(commerce_proprty)
-commerce_owner_property<-commerce_owner_property_full%>%
-  select(ownname,ownaddress,owncity,ownstate,ownzip,Parcel_No,HOMEEXEMPT)
 commerce_issues_info<-commerce_issues%>%
   left_join(commerce_owner_property)
 commerce_info_issues<-commerce_issues_info%>%
-  mutate("primary_city"="Commerce")
-commerce_info_issues <- commerce_info_issues %>%  
-  mutate(realkey = as.integer(realkey))
+  mutate("primary_city"="Commerce",
+         realkey=as.character(realkey))
 ### Combine Gainesville data
-Gainesville_issues_and_info <- read_excel("Gainesville issues and info.xlsx")
+Gainesville_issues_and_info <- read_excel("data/Gainesville issues and info.xlsx") %>%
+  mutate(classify=case_when(min_total>3|maj_total>1~"Dilapidated",
+                            min_total>1|maj_total>0~"Substandard",
+                            min_total<2|maj_total<1~"Standard"))
+
+gainesville_latlong<-read_csv("data/Gainesville/gville_points.csv") %>%
+  select(PARCEL_NUM,long,lat) %>%
+  rename(parcel_num=PARCEL_NUM)
 gainesville_info_issues<-Gainesville_issues_and_info%>%
-  mutate("primary_city"="gainesville")
+  mutate("primary_city"="gainesville") %>%
+  left_join(gainesville_latlong)
 ###Combine hartwell
 hartwell_info_issues<-hartwell_issues_and_owner_correct_version
 hartwell_info_issues<-hartwell_info_issues%>%
   mutate("primary_city"="hartwell")
 ###Combine millen
-millen_info_full<-millen_info_with_parcel_number%>%
-  left_join(millen_owner)
-millen_info<-millen_info_full%>%
-  select(Parcel_No,ownname,ownaddress,owncity,ownstate)
-millen_info_issues<-millen_issues%>%
-  left_join(millen_info)
-millen_info_issues<-millen_info_issues%>%
+millen_info_issues<-millen_issues %>%
+  rename(Parcel_No=Parcel_ID) %>%
+  left_join(millen_info_with_parcel_number) %>%
+  left_join(millen_owner)%>%
+  #left_join(millen_info) %>%
   mutate("primary_city"="millen")
 ###Combine monroe
-monroe_info<-monroe_info_full%>%
-  select(ownname,ownaddress,owncity,ownstate,ownzip,homeexempt,Parcel_No)
 monroe_info_issues<-monroe_issues%>%
-  left_join(monroe_info)
-monroe_info_issues<-monroe_info_issues%>%
-  mutate("primary_city"="monroe")
+  left_join(monroe_info,by="Parcel_No") %>%
+  mutate("primary_city"="monroe",
+         address=if_else(address.x=="No",address.y,address.x)) %>%
+  select(-address.x,-address.y)
 ###Combine cochran
-cochran_info<-Cochran_info_full%>%
-  select(ownkey,ownname,ownaddress,owncity,ownstate,ownzip)
-cochran_info_issues<-Cochran_Issues%>%
-  left_join(cochran_info)
-cochran_info_issues<-cochran_info_issues%>%
+cochran_info_issues<-cochran_issues%>%
+  rename(Parcel_No=parcel_num) %>%
+  left_join(Cochran_info) %>%
   mutate("primary_city"="cochran")
-cochran_info_issues <- cochran_info_issues %>%  
-  mutate(realkey = as.character(realkey))
-###Combine Warrenton
-warrenton_spacer<-substr(warrenton_issues[3,]$Parcel_No,4,7)
-warrenton2<-warrenton_issues %>%
-  mutate(parcel_new=gsub(warrenton_spacer," ",Parcel_No))
-warrenton_information <- warrenton_information_full %>%  
-  mutate(ownaddress = as.logical(ownaddress))
-warrenton_info_issues_incom<-warrenton_issues%>%
-  left_join(warrenton_information)%>%
-  mutate("primary_city"="warrenton")
-warrenton_info_issues <- warrenton_info_issues_incom %>%  
-  mutate(homestead = as.numeric(homestead))
+###Combine Warrenton, need help on fizxing excel
+warrenton_spacer<-substr(warrenton_issues[3,]$parcel_num,4,7)
+warrenton_issues<-warrenton_issues %>%
+  rename(parcelno_old=parcel_num) %>%
+  mutate(Parcel_No=gsub(warrenton_spacer," ",parcelno_old))
+#head(warrenton_issues$Parcel_No)
+warrenton_information <- warrenton_information %>%
+  select(-Parcel_No) %>%
+  rename(Parcel_No=Parcel_Number)
+warrenton_info_issues<-warrenton_issues%>%
+  left_join(warrenton_information) %>%
+  mutate(primary_city="warrenton")
+
+#Create variable cross tab
+names_list<-function(df,var){
+  df1<-as_tibble(names(df)) %>%
+    mutate(varname=1) 
+  names(df1)<-c("value",var)
+  df1
+}
+
+millen_names<-names_list(millen_info_issues,"millen")
+gainesville_names<-names_list(gainesville_info_issues,"gville") 
+hartwell_names<-names_list(hartwell_info_issues,"hartwell")
+cochran_names<-names_list(cochran_info_issues,"cochran")
+commerce_names<-names_list(commerce_info_issues,"commerce")
+monroe_names<-names_list(monroe_info_issues,"monroe")
+warrenton_names<-names_list(warrenton_info_issues,"warrenton")
+
+var_s1<-millen_names %>%
+  full_join(gainesville_names) %>%
+  full_join(monroe_names)
+
+var_s2<-hartwell_names %>%
+  full_join(cochran_names) %>%
+  full_join(commerce_names) %>%
+  full_join(warrenton_names)
+
+# write_csv(var_s1,"data/var_s1.csv")
+# write_csv(var_s2,"data/var_s22.csv")
+
+##Create Survey 1 data
+s1_cw<-read_csv("data/var_s1.csv")
+
+millen_info_issues$spreadid<-1:nrow(millen_info_issues)
+millen_data_cw<-millen_info_issues %>%
+  gather(-spreadid,key="var",value="value") %>%
+  right_join(s1_cw %>% filter(millen==1)) %>%
+  select(-var,-millen:-monroe) %>%
+  spread(universal,value) 
+
+gainesville_info_issues$spreadid<-1:nrow(gainesville_info_issues)
+gainesville_data_cw<-gainesville_info_issues %>%
+  gather(-spreadid,key="var",value="value") %>%
+  right_join(s1_cw %>% filter(gville==1)) %>%
+  select(-var,-millen:-monroe) %>%
+  spread(universal,value) %>%
+  select(-spreadid)
+
+monroe_info_issues$spreadid<-1:nrow(monroe_info_issues)
+monroe_data_cw<-monroe_info_issues %>%
+  select(-x,-y) %>%
+  gather(-spreadid,key="var",value="value") %>%
+  right_join(s1_cw %>% filter(monroe==1)) %>%
+  select(-var,-millen:-monroe) %>%
+  filter(is.na(spreadid)==FALSE) %>%
+  filter(is.na(value)==FALSE) %>%
+  spread(universal,value) 
+
+s1_data<-bind_rows(monroe_data_cw,millen_data_cw,gainesville_data_cw) %>%
+  mutate(survey="v1") %>%
+  left_join(record_times) %>%
+  mutate(prop_add=case_when(add_rev=="No"~address,
+                            is.na(add_rev)==TRUE~address,
+                            add_rev=="Unknown"~address,
+                            TRUE~add_rev)) %>%
+  select(s1_varlist$s1_vars)
+
+#Create numeric dummies for s1 data
+s1_data_num<-s1_data %>% 
+  gather(c(min_chimn:min_rot,min_unfinw:maj_siding,maj_winddo,
+           yard_grcov:lit_yard),key=issue,value=value) %>%
+  mutate(value1=if_else(value=="Yes",1,0)) %>%
+  select(-value) %>%
+  distinct() %>%
+  spread(issue,value1) %>%
+  select(s1_varlist$s1_vars)
+
+write_csv(s1_data_num,"s1_data.csv")
+
+#Version 2 data
+s2_cw<-read_csv("data/var_s2.csv")
+
+hartwell_info_issues$spreadid<-1:nrow(hartwell_info_issues)
+hartwell_data_cw<-hartwell_info_issues %>%
+  gather(-spreadid,key="var",value="value") %>%
+  right_join(s2_cw %>% filter(hartwell==1)) %>%
+  select(-var,-hartwell:-warrenton) %>%
+  spread(universal,value) %>%
+  select(-spreadid)
+
+cochran_info_issues$spreadid<-1:nrow(cochran_info_issues)
+cochran_data_cw<-cochran_info_issues %>%
+  gather(-spreadid,key="var",value="value") %>%
+  right_join(s2_cw %>% filter(cochran==1)) %>%
+  select(-var,-hartwell:-warrenton) %>%
+  spread(universal,value) %>%
+  select(-spreadid)
+
+commerce_info_issues$spreadid<-1:nrow(commerce_info_issues)
+commerce_data_cw<-commerce_info_issues %>%
+  gather(-spreadid,key="var",value="value") %>%
+  right_join(s2_cw %>% filter(commerce==1)) %>%
+  select(-var,-hartwell:-warrenton) %>%
+  spread(universal,value) %>%
+  select(-spreadid)
+
+warrenton_info_issues$spreadid<-1:nrow(warrenton_info_issues)
+warrenton_data_cw<-warrenton_info_issues %>%
+  gather(-spreadid,key="var",value="value") %>%
+  right_join(s2_cw %>% filter(warrenton==1)) %>%
+  select(-var,-hartwell:-warrenton) %>%
+  spread(universal,value) %>%
+  select(-spreadid)
 
 
 
-###eliminate all data from property and owner, except own address,name, city, state, homestead variable, eliminate old curo projects
-#change variable names to match. seperate one for each survey, finish the crosswalk file
+#Combine s2 data
+s2_data<-bind_rows(hartwell_data_cw,cochran_data_cw,commerce_data_cw,
+                   warrenton_data_cw) %>%
+  mutate(survey="v2") %>%
+  left_join(record_times) %>%
+  mutate(prop_add=if_else(is.na(address_add)==TRUE,prop_add,address_add)) %>%
+  select(s2_varlist$s2_vars) 
 
- ### merge all files together
-
-###merge all data
 
 
-full_bind<-bind_rows(millen_info_issues, gainesville_info_issues,
-                          hartwell_info_issues,cochran_info_issues,
-                          monroe_info_issues,warrenton_info_issues, commerce_info_issues)
-full_data_combine<-merge(gainesville_info_issues,millen_info_issues,hartwell_info_issues,cochran_info_issues,millen_info_issues,warrenton_info_issues,by=c("primary_city"))
+#transform issue dummies to 0/1
+s2_data<-s2_data %>%
+  gather(found_compreplace:roof_shingles,key=issue,value=value) %>%
+  mutate(value1=if_else(value>0,1,0)) %>%
+  select(-value) %>%
+  spread(issue,value1) %>%
+  gather(genprop_forsale:yard_weeds,key=issue,value=value) %>%
+  mutate(value1=if_else(value==TRUE,1,0)) %>%
+  select(-value) %>%
+  spread(issue,value1) %>%
+  select(s2_varlist$s2_vars) 
+write_csv(s2_data,"s2_data.csv")
+
+allsurvey_data<-bind_rows(s1_data_num %>% mutate(ownzip=as.character(ownzip)),
+                          s2_data %>% mutate(x=as.character(x),y=as.character(y))) 
+write_csv(allsurvey_data,"allsurvey_data.csv")
