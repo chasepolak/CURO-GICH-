@@ -18,6 +18,9 @@ hartwell_issues_and_owner_correct_version <- read_excel("data/hartwell issues an
 millen_info_with_parcel_number <- read_excel("data/millen info with parcel number.xlsx")
 millen_issues <- read_csv("data/Millen/Millen_flexdash_v7/millen_surveydata_rev_2017_06_27.csv")
 millen_owner <- read_excel("data/millen_owner.xlsx")
+millen_home_exempt <- read_csv("data/millen home exempt.csv")%>%
+  select("PARCEL_NO","HOMEEXEMPT")%>%
+  rename(Parcel_No=PARCEL_NO)
 monroe_info <- read_excel("data/monroe info.xlsx")
 monroe_issues <- read_csv("data/Monroe/monroe_flexdash/Monroedata_2017_08_25_combined.csv") %>%
   rename(Parcel_No=Parcel_ID)
@@ -50,6 +53,9 @@ Cochran_info<-read_csv("data/Cochran/cochran_shiny/data/cochran_parcelpoints_201
   distinct() %>%
   rename(ownkey=Ownkey) %>%
   right_join(Cochran_info1)
+cochran_home_exempt <- read_csv("data/cochran home exempt.csv")%>%
+  select("PARCEL_NO","HOMEEXEMPT")%>%
+  rename(Parcel_No=PARCEL_NO)
 ### Combine Commerce Data
 commerce_owner_property<-commerce_owner%>%
   left_join(commerce_proprty)
@@ -80,7 +86,8 @@ millen_info_issues<-millen_issues %>%
   left_join(millen_info_with_parcel_number) %>%
   left_join(millen_owner)%>%
   #left_join(millen_info) %>%
-  mutate("primary_city"="millen")
+  mutate("primary_city"="millen")%>%
+  left_join(millen.home.exempt)
 ###Combine monroe
 monroe_info_issues<-monroe_issues%>%
   left_join(monroe_info,by="Parcel_No") %>%
@@ -91,7 +98,8 @@ monroe_info_issues<-monroe_issues%>%
 cochran_info_issues<-cochran_issues%>%
   rename(Parcel_No=parcel_num) %>%
   left_join(Cochran_info) %>%
-  mutate("primary_city"="cochran")
+  mutate("primary_city"="cochran")%>%
+  left_join(cochran_home_exempt)
 ###Combine Warrenton, need help on fizxing excel
 warrenton_spacer<-substr(warrenton_issues[3,]$parcel_num,4,7)
 warrenton_issues<-warrenton_issues %>%
