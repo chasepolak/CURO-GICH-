@@ -16,17 +16,17 @@ commerce_proprty <- read_excel("data/commerce proprty.xlsx")
 Gainesville_issues_and_info <- read_excel("data/Gainesville issues and info.xlsx")
 hartwell_issues_and_owner_correct_version <- read_excel("data/hartwell issues and owner correct version.xlsx")
 millen_info_with_parcel_number <- read_excel("data/millen info with parcel number.xlsx")
-millen_issues <- read_csv("data/Millen/Millen_flexdash_v7/millen_surveydata_rev_2017_06_27.csv")
+millen_issues <- read_csv("data/millen_surveydata_rev_2017_06_27.csv")
 millen_owner <- read_excel("data/millen_owner.xlsx")
 millen_home_exempt <- read_csv("data/millen home exempt.csv")%>%
   select("PARCEL_NO","HOMEEXEMPT")%>%
   rename(Parcel_No=PARCEL_NO)
 monroe_info <- read_excel("data/monroe info.xlsx")
-monroe_issues <- read_csv("data/Monroe/monroe_flexdash/Monroedata_2017_08_25_combined.csv") %>%
+monroe_issues <- read_csv("data/Monroedata_2017_08_25_combined.csv") %>%
   rename(Parcel_No=Parcel_ID)
 
 warrenton_information <- read_csv("data/warrenton_information1.csv")
-warrenton_issues1 <- read_csv("data/Warrenton/warrenton_shiny/Data/parcel_points_issue.csv") %>%
+warrenton_issues1 <- read_csv("data/parcel_points_issue_warrenton.csv") %>%
   mutate(dummy=1) 
 warrenton_issues2<-warrenton_issues1 %>%
   select(fulcrum_id:photo4) %>%
@@ -37,7 +37,7 @@ warrenton_issues<-warrenton_issues1 %>%
   spread(value,dummy,fill=0) %>%
   right_join(warrenton_issues2)
 
-cochran_issues1 <- read_csv("data/Cochran/cochran_shiny/data/parcel_points_issue.csv") %>%
+cochran_issues1 <- read_csv("data/parcel_points_issue_cochran.csv") %>%
   mutate(dummy=1) 
 cochran_issues2<-cochran_issues1 %>%
   select(fulcrum_id:photo4) %>%
@@ -48,7 +48,7 @@ cochran_issues<-cochran_issues1 %>%
   spread(value,dummy,fill=0) %>%
   right_join(cochran_issues2)
 Cochran_info1 <- read_excel("data/Cochran info.xlsx")
-Cochran_info<-read_csv("data/Cochran/cochran_shiny/data/cochran_parcelpoints_2018_07_13.csv") %>%
+Cochran_info<-read_csv("data/cochran_parcelpoints_2018_07_13.csv") %>%
   select(Ownkey,Parcel_No) %>%
   distinct() %>%
   rename(ownkey=Ownkey) %>%
@@ -70,7 +70,7 @@ Gainesville_issues_and_info <- read_excel("data/Gainesville issues and info.xlsx
                             min_total>1|maj_total>0~"Substandard",
                             min_total<2|maj_total<1~"Standard"))
 
-gainesville_latlong<-read_csv("data/Gainesville/gville_points.csv") %>%
+gainesville_latlong<-read_csv("data/gville_points.csv") %>%
   select(PARCEL_NUM,long,lat) %>%
   rename(parcel_num=PARCEL_NUM)
 gainesville_info_issues<-Gainesville_issues_and_info%>%
