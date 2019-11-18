@@ -2,7 +2,7 @@ var,hartwell,cochran,commerce,warrenton,universal
 address,1,NA,1,1,address_add
 address_add1,NA,NA,1,NA,address_add1
 comments,1,1,1,1,comments
-condition,NA,1,1,1,condition
+condition,1,1,1,1,condition
 condition...78,1,NA,NA,NA,condition
 date,1,NA,1,NA,date_create
 ext_chimney,NA,1,NA,1,ext_chimney
