@@ -1,5 +1,5 @@
 library(tidyverse)
-install.packages("openxlsx") 
+###install.packages("openxlsx") 
 library(openxlsx)
 library(sf)
 library(viridis)
@@ -34,13 +34,14 @@ s1data1_tbl_millen<-s1data1 %>%
 
 write_csv(s1data1,"s1data_test.csv")
 write.xlsx(s1data1_tbl_millen,"s1data1_tbl_millen.xlsx")
-millen_as_sf<-s1data %>%filter(primary_city=="millen")%>%
+millen_as_sf<-s1data1 %>%filter(primary_city=="millen")%>%
   mutate(x=as.numeric(x))%>%
   mutate(y=as.numeric(y))%>%
   st_as_sf(coords=c("x","y"),crs=4326,remove=FALSE)
 tmap_mode("view")
 tm_shape(millen_as_sf)+
-  tm_dots(col="classify")
+  tm_dots(col="classify",size = 2)+
+  tm_facets("landlord")
 ###Monroe
 s1data1<-s1data %>%
   left_join(s1data_landlord) %>%
@@ -64,7 +65,7 @@ s1data1_tbl_monroe<-s1data1 %>%
   spread(classify,pct)
 
 write.xlsx(s1data1_tbl_monroe,"s1data1_tbl_monroe.xlsx")
-monroe_as_sf<-s1data  %>%filter(primary_city=="monroe")%>%
+monroe_as_sf<-s1data1  %>%filter(primary_city=="monroe")%>%
   mutate(x=as.numeric(x))%>%
   mutate(y=as.numeric(y))%>%
   st_as_sf(coords=c("x","y"),crs=4326,remove=FALSE)
@@ -94,7 +95,7 @@ s1data1_tbl_gaineseville<-s1data1 %>%
   spread(classify,pct)
 
 write.xlsx(s1data1_tbl_gaineseville,"s1data1_tbl_gainesville.xlsx")
-gainesville_as_sf<-s1data %>%filter(primary_city=="gainesville")%>%
+gainesville_as_sf<-s1data1 %>%filter(primary_city=="gainesville")%>%
   mutate(x=as.numeric(x))%>%
   mutate(y=as.numeric(y))%>%
   st_as_sf(coords=c("long","lat"),crs=4326,remove=FALSE)
