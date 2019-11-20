@@ -186,7 +186,8 @@ s1_data<-bind_rows(monroe_data_cw,millen_data_cw,gainesville_data_cw) %>%
                             is.na(add_rev)==TRUE~address,
                             add_rev=="Unknown"~address,
                             TRUE~add_rev)) %>%
-  select(s1_varlist$s1_vars)
+  select(s1_varlist$s1_vars)%>%
+  left_join(gainesville_latlong)
 
 #Create numeric dummies for s1 data
 s1_data_num<-s1_data %>% 
