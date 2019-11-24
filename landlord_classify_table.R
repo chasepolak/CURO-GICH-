@@ -42,7 +42,7 @@ millen_as_sf<-s1data1_millen %>%filter(primary_city=="millen")%>%
 millen_as_sf$classify<-factor(millen_as_sf$classify, levels = c("Standard","Substandard","Dilapidated"))
 tmap_mode("view")
 tm_shape(millen_as_sf)+
-  tm_dots(col="classify",size = .1)+
+  tm_dots(col="classify",palette=c(Standard='red', Substandard='grey', Dilapidated='grey'),size = .1)+
   tm_facets("landlord")
 ###monroe
 s1data1_monroe<-s1data %>%
@@ -72,8 +72,9 @@ monroe_as_sf<-s1data1_monroe  %>%filter(primary_city=="monroe")%>%
   mutate(y=as.numeric(y))%>%
   st_as_sf(coords=c("x","y"),crs=4326,remove=FALSE)
 monroe_as_sf$classify<-factor(monroe_as_sf$classify, levels = c("Standard","Substandard","Dilapidated"))
+tmap_mode("view")
 tm_shape(monroe_as_sf)+
-  tm_dots(col="classify",size = .1)+
+  tm_dots(col="classify",palette=c(Standard='red', Substandard='grey', Dilapidated='grey'),size = .1)+
   tm_facets("landlord")
 ###Gainesville
 s1data1_gainesville<-s1data %>%
@@ -105,7 +106,7 @@ gainesville_as_sf<-s1data1_gainesville %>%filter(primary_city=="gainesville")%>%
 gainesville_as_sf$classify<-factor(gainesville_as_sf$classify, levels = c("Standard","Substandard","Dilapidated"))
 tmap_mode("view")
 tm_shape(gainesville_as_sf)+
-  tm_dots(col="classify")+
+  tm_dots(col="classify",palette=c(Standard='red', Substandard='grey', Dilapidated='grey'),size = .1)+
   tm_facets("landlord")
 ###Hartwell
 s2data_landlord<-s2_data %>%
@@ -142,7 +143,9 @@ hartwell_as_sf$condition<-factor(hartwell_as_sf$condition, levels = c("well main
 "moderate rehabilitation needed","substantial rehabilitation needed","dilapidated"))
 tmap_mode("view")
 tm_shape(hartwell_as_sf)+
-  tm_dots(col="condition")+
+  tm_dots(col="condition",palette=c("well maintained"='red', "sound"='red', "minor repairs needed"='red',
+                                    "moderate rehabilitation needed"= 'grey', "substantial rehabilitation needed"='grey',"dilapidated"='grey'))+
+          tm_dots(size = .5)+
   tm_facets("landlord")
   
 ###Cochran
@@ -180,7 +183,9 @@ cochran_as_sf$condition<-factor(cochran_as_sf$condition, levels = c("well mainta
                                                                       "moderate rehabilitation needed","substantial rehabilitation needed","dilapidated"))
 tmap_mode("view")
 tm_shape(cochran_as_sf)+
-  tm_dots(col="condition")+
+  tm_dots(col="condition",palette=c("well maintained"='red', "sound"='red', "minor repairs needed"='red',
+                                    "moderate rehabilitation needed"= 'grey', "substantial rehabilitation needed"='grey',"dilapidated"='grey'))+
+ tm_dots(size=.1)+
   tm_facets("landlord")
 ###Commerce
 s2data_landlord<-s2_data %>%
@@ -217,6 +222,7 @@ commerce_as_sf$condition<-factor(commerce_as_sf$condition, levels = c("well main
                                                                       "moderate rehabilitation needed","substantial rehabilitation needed","dilapidated"))
 tmap_mode("view")
 tm_shape(commerce_as_sf)+
-  tm_dots(col="condition")+
+  tm_dots(col="condition",palette=c("well maintained"='red', "sound"='red', "minor repairs needed"='red',
+                                     "moderate rehabilitation needed"= 'grey', "substantial rehabilitation needed"='grey',"dilapidated"='grey'))+
   tm_dots(size=.1)+
   tm_facets("landlord")
