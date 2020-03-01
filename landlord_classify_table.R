@@ -23,7 +23,7 @@ s1data1_millen<-s1data %>%
   filter(primary_city=="millen")
 
 
-chisq.test(s1data1$classify,s1data1$landlord)
+chisq.test(s1data1_millen$classify,s1data1_millen$landlord)
 ###p-value < 2.2e-16
 s1data1_tbl_millen<-s1data1_millen %>%
   count(primary_city,landlord,classify,name="count") %>%
@@ -56,7 +56,7 @@ s1data1_monroe<-s1data %>%
                             homeexempt=="S0" & citymatch==0 & multiprop==1~"outtown_landlord")) %>%
   filter(primary_city=="monroe")
 
-chisq.test(s1data1$classify,s1data1$landlord)
+chisq.test(s1data1_monroe$classify,s1data1_monroe$landlord)
 ###p-value < 2.14e-11
 s1data1_tbl_monroe<-s1data1_monroe %>%
   count(primary_city,landlord,classify,name="count") %>%
@@ -88,7 +88,7 @@ s1data1_gainesville<-s1data %>%
                             homeexempt=="S0" & citymatch==0 & multiprop==1~"outtown_landlord")) %>%
   filter(primary_city=="gainesville")
 
-chisq.test(s1data1$classify,s1data1$landlord)
+chisq.test(s1data1_gainesville$classify,s1data1_gainesville$landlord)
 ###p-value 0.001725
 s1data1_tbl_gaineseville<-s1data1_gainesville %>%
   count(primary_city,landlord,classify,name="count") %>%
@@ -123,7 +123,7 @@ s2data2_hartwell<-s2_data %>%
                             homeexempt=="S0" & citymatch==0 & multiprop==1~"outtown_landlord")) %>%
   filter(primary_city=="hartwell")
 
-chisq.test(s2data2$condition,s2data2$landlord)
+chisq.test(s2data2_hartwell$condition,s2data2_hartwell$landlord)
 ###p-value 0.0002786
 s2data2_tbl_hartwell<-s2data2_hartwell %>%
   count(primary_city,landlord,condition,name="count") %>%
@@ -226,3 +226,4 @@ tm_shape(commerce_as_sf)+
                                      "moderate rehabilitation needed"= 'grey', "substantial rehabilitation needed"='grey',"dilapidated"='grey'))+
   tm_dots(size=.1)+
   tm_facets("landlord")
+

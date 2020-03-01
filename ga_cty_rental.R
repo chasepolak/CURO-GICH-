@@ -23,3 +23,4 @@ tm_shape(communitypoints)+
   tm_bubbles(size=0.2,col="black")+
   tm_text("Pseudonym",shadow=TRUE,auto.placement = TRUE,
           bg.color="white",bg.alpha=0.6)
+
