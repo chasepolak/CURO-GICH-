@@ -56,7 +56,9 @@ gainesville_complete<-gainesville_landlord%>%
   mutate(landlord=case_when(homeexempt!="S0"~"owner",
                             homeexempt=="S0" & multiprop==0~"singleowner",
                             homeexempt=="S0" & citymatch==1 & multiprop==1~"outtown_landlord",
-                            homeexempt=="S0" & citymatch==0 & multiprop==1~"intown_landlord"))
+                            homeexempt=="S0" & citymatch==0 & multiprop==1~"intown_landlord"))%>%
+  filter(!is.na(condition))%>%
+  filter(condition!="NA")
 ###Millen
 millen_info_with_parcel_number <- read_excel("data/millen info with parcel number.xlsx")%>%
   rename(parcel_num=Parcel_No,realkey=Realkey)%>%
@@ -157,8 +159,35 @@ survey_1<-bind_rows(gainesville_complete,millen_complete,monroe_complete)%>%
   filter(condition!="NA")%>%
   mutate("survey"="one")%>%
   filter(!is.na(ownname))%>%
-  filter(ownname!="NA")
+  filter(ownname!="NA")%>%
+  mutate(landlord_classification=case_when(homeexempt!="S0"~"homeowner",
+                                           homeexempt=="S0" & citymatch==1 ~"outtown_landlord",
+                                           homeexempt=="S0" & citymatch==0 ~"intown_landlord"))%>%
+  mutate(landlord_yes_no=case_when(homeexempt!="S0"~"no",
+                                   homeexempt=="S0"~"yes"))
 write.xlsx(survey_1,"revised_survey_1.xlsx")
+###Survey 1 Table
+survey_1_table_landlord<-survey_1 %>%
+  count(primary_city,landlord,condition,name="count") %>%
+  group_by(landlord) %>%
+  mutate(total=sum(count)) %>%
+  mutate(pct=round(count/total*100,1)) %>%
+  select(primary_city,landlord,condition,pct) %>%
+  spread(condition,pct)
+survey_1_table_landlord_yes_no<-survey_1%>%
+  count(primary_city,landlord_yes_no,condition,name="count") %>%
+  group_by(landlord_yes_no) %>%
+  mutate(total=sum(count)) %>%
+  mutate(pct=round(count/total*100,1)) %>%
+  select(primary_city,landlord_yes_no,condition,pct) %>%
+  spread(condition,pct)
+survey_1_table_landlord_classification<-survey_1%>%
+  count(primary_city,landlord_classification,condition,name="count") %>%
+  group_by(landlord_classification) %>%
+  mutate(total=sum(count)) %>%
+  mutate(pct=round(count/total*100,1)) %>%
+  select(primary_city,landlord_classification,condition,pct) %>%
+  spread(condition,pct)
 ###Survey 1 Map
 survey_1_as_sf<-survey_1 %>%
   mutate(x=as.numeric(X))%>%
@@ -168,7 +197,8 @@ survey_1_as_sf$condition<-factor(survey_1_as_sf$condition, levels = c("Standard"
 tmap_mode("view")
 tm_shape(survey_1_as_sf)+
   tm_dots(col="condition",palette=c(Standard='grey', Substandard='red', Dilapidated='red'))+
-  tm_dots(size=.1)
+  tm_dots(size=.1)+
+  tm_facets("landlord_classification")
 ### Commerce
 commerce_issues_info <- read_csv("data/commerce_parcel_points.csv")%>%
   mutate(primary_city="Commerce")%>%
@@ -354,10 +384,37 @@ survey_2<-bind_rows(hartwell_complete,commerce_complete,warrenton_complete,cochr
   filter(condition!="NA")%>%
   mutate("survey"="two")%>%
   filter(!is.na(ownname))%>%
-  filter(ownname!="NA")
+ mutate(landlord_classification=case_when(homeexempt!="S0"~"homeowner",
+                                                  homeexempt=="S0" & citymatch==1 ~"outtown_landlord",
+                                                  homeexempt=="S0" & citymatch==0 ~"intown_landlord"))%>%
+  mutate(landlord_yes_no=case_when(homeexempt!="S0"~"no",
+                                   homeexempt=="S0"~"yes"))
+
 write.xlsx(survey_2,"revised_survey_2.xlsx")
+###Survey 2 Table
+survey_2_table_landlord<-survey_2 %>%
+  count(primary_city,landlord,condition,name="count") %>%
+  group_by(landlord) %>%
+  mutate(total=sum(count)) %>%
+  mutate(pct=round(count/total*100,1)) %>%
+  select(primary_city,landlord,condition,pct) %>%
+  spread(condition,pct)
+survey_2_table_landlord_yes_no<-survey_2%>%
+  count(primary_city,landlord_yes_no,condition,name="count") %>%
+  group_by(landlord_yes_no) %>%
+  mutate(total=sum(count)) %>%
+  mutate(pct=round(count/total*100,1)) %>%
+  select(primary_city,landlord_yes_no,condition,pct) %>%
+  spread(condition,pct)
+survey_2_table_landlord_classification<-survey_2%>%
+  count(primary_city,landlord_classification,condition,name="count") %>%
+  group_by(landlord_classification) %>%
+  mutate(total=sum(count)) %>%
+  mutate(pct=round(count/total*100,1)) %>%
+  select(primary_city,landlord_classification,condition,pct) %>%
+  spread(condition,pct)
 ###Survey 2 Map
-survey_2_as_sf<-survey_2 %>%
+survey_2_as_sf<-survey_2%>%
   mutate(x=as.numeric(X))%>%
   mutate(y=as.numeric(Y))%>%
   st_as_sf(coords=c("x","y"),crs=4326,remove=FALSE)
@@ -367,9 +424,17 @@ tmap_mode("view")
 tm_shape(survey_2_as_sf)+
   tm_dots(col="condition",palette=c("well maintained"='grey', "sound"='grey', "minor repairs needed"='grey',
                                     "moderate rehabilitation needed"= 'red', "substantial rehabilitation needed"='red',"dilapidated"='red'))+
-  tm_dots(size=.1)
+  tm_dots(size=.1)+
+  tm_facets("landlord_yes_no")
+
 
 ###All Survey
-all_survey<-bind_rows(survey_1,survey_2)
+all_survey<-bind_rows(survey_1,survey_2)%>%
+  mutate(landlord_classification=case_when(homeexempt!="S0"~"homeowner",
+                                           homeexempt=="S0" & citymatch==1 ~"outtown_landlord",
+                                           homeexempt=="S0" & citymatch==0 ~"intown_landlord"))%>%
+  mutate(landlord_yes_no=case_when(homeexempt!="S0"~"no",
+                                           homeexempt=="S0"~"yes"))
+                              
 write.xlsx(all_survey,"revised_all_survey.xlsx")
 
