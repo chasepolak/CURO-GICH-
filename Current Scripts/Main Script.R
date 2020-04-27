@@ -218,6 +218,7 @@ landlord_monroe_table<-survey_1 %>%
   mutate(pct=round(count/total*100,1)) %>%
   select(primary_city,landlord,condition,pct) %>%
   spread(condition,pct)
+
 write.xlsx(landlord_monroe_table,"tables/landlord_monroe_table.xlsx")
 landlord_yes_no_monroe_table<-survey_1%>%
   filter(primary_city=="monroe")%>%
@@ -261,7 +262,7 @@ survey_1_as_sf$condition<-factor(survey_1_as_sf$condition, levels = c("Standard"
 tmap_mode("view")
 tm_shape(survey_1_as_sf)+
   tm_dots(col="condition",palette=c(Standard='grey', Substandard='red', Dilapidated='red'))+
-  tm_dots(size=.1)+
+  tm_dots(size=.5)+
   tm_facets("landlord_classification")
 ###Survey 2
 ### Commerce
@@ -581,7 +582,7 @@ tm_shape(survey_2_as_sf)+
   tm_dots(col="condition",palette=c("well maintained"='grey', "sound"='grey', "minor repairs needed"='grey',
                                     "moderate rehabilitation needed"= 'red', "substantial rehabilitation needed"='red',"dilapidated"='red'))+
   tm_dots(size=.1)+
-  tm_facets("landlord_yes_no")
+  tm_facets("landlord_classification")
 
 
 ###All Survey
